@@ -135,6 +135,13 @@ export function AppShell({ children }: AppShellProps) {
       <div className="flex-1 flex">
         {/* Desktop sidebar */}
         <aside className="hidden lg:flex w-60 shrink-0 flex-col border-r border-border/60 bg-sidebar/40 p-3 gap-1 sticky top-14 h-[calc(100vh-3.5rem)]">
+          <Button
+            onClick={() => { haptic(); setCreateMenu(true); }}
+            className="w-full justify-start gap-2.5 h-11 rounded-2xl bg-primary text-primary-foreground font-semibold elev-1 ls-ripple hover:scale-[1.02] active:scale-[0.98] transition-all mb-2 shadow-sm"
+          >
+            <Plus className="h-5 w-5" />
+            <span>New Note</span>
+          </Button>
           <SideNav section={section} onSelect={setSection} />
           <div className="mt-auto p-3 rounded-2xl bg-accent/40 text-xs text-muted-foreground">
             <div className="flex items-center gap-1.5 font-medium text-foreground mb-1">
@@ -146,12 +153,19 @@ export function AppShell({ children }: AppShellProps) {
 
         {/* Mobile drawer */}
         <Sheet open={drawerOpen} onOpenChange={setDrawerOpen}>
-          <SheetContent side="left" className="w-72 p-3">
+          <SheetContent side="left" className="w-72 p-3 flex flex-col">
             <SheetHeader className="mb-2">
               <SheetTitle className="flex items-center gap-2">
                 <Logo size={28} className="text-primary" /> LS Notes
               </SheetTitle>
             </SheetHeader>
+            <Button
+              onClick={() => { haptic(); setDrawerOpen(false); setCreateMenu(true); }}
+              className="w-full justify-start gap-2.5 h-11 rounded-2xl bg-primary text-primary-foreground font-semibold elev-1 ls-ripple mb-2"
+            >
+              <Plus className="h-5 w-5" />
+              <span>New Note</span>
+            </Button>
             <SideNav
               section={section}
               onSelect={(s) => { setSection(s); setDrawerOpen(false); }}
@@ -168,13 +182,14 @@ export function AppShell({ children }: AppShellProps) {
         </main>
       </div>
 
-      {/* FAB */}
+      {/* Floating Action Button (FAB) */}
       <button
         onClick={() => { haptic(); setCreateMenu(true); }}
-        className="fixed bottom-20 lg:bottom-6 right-4 sm:right-6 z-30 h-14 w-14 rounded-2xl bg-primary text-primary-foreground elev-2 ls-ripple flex items-center justify-center hover:scale-105 active:scale-95 transition-transform"
-        aria-label="Create note"
+        className="fixed bottom-20 lg:bottom-6 right-4 sm:right-6 z-40 h-14 w-14 rounded-2xl bg-primary text-primary-foreground elev-2 ls-ripple flex items-center justify-center hover:scale-105 active:scale-95 transition-transform shadow-lg"
+        aria-label="Create note (+)"
+        title="Create note (+)"
       >
-        <Plus className="h-6 w-6" />
+        <Plus className="h-6 w-6 stroke-[2.5]" />
       </button>
 
       {/* Bottom nav (mobile) */}

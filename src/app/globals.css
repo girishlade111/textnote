@@ -185,9 +185,11 @@
 .elev-2 { box-shadow: var(--elev-shadow-lg); }
 
 .ls-ripple {
-  position: relative;
-  overflow: hidden;
   isolation: isolate;
+  overflow: hidden;
+}
+.ls-ripple:not(.fixed):not(.absolute):not(.sticky) {
+  position: relative;
 }
 .ls-ripple::after {
   content: "";
