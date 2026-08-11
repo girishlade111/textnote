@@ -1,0 +1,118 @@
+// LS Notes — local-first note-taking database schema
+// All data is stored locally on-device via SQLite. No cloud, no accounts.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Note {
+  id          String   @id @default(cuid())
+  title       String   @default("")
+  // JSON-serialized content blocks (text, headings, checklists, images, code, tables, etc.)
+  content     String   @default("[]")
+  // Plain-text excerpt used for previews and search
+  excerpt     String   @default("")
+  type        String   @default("text") // text | checklist | photo | audio | sketch | file | smart | bookmark | code | table | scan
+  color       String   @default("default")
+  folderId    String?
+  folder      Folder?  @relation(fields: [folderId], references: [id], onDelete: SetNull)
+  isPinned    Boolean  @default(false)
+  isFavorite  Boolean  @default(false)
+  isPrivate   Boolean  @default(false)
+  isArchived  Boolean  @default(false)
+  // Trash
+  isDeleted      Boolean  @default(false)
+  deletedAt      DateTime?
+  deletedFromId  String?
+  // Word / char counts derived from content
+  wordCount    Int      @default(0)
+  charCount    Int      @default(0)
+  attachmentsSize Int  @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  // For ordering
+  order        Float    @default(0)
+
+  tags        NoteTag[]
+  attachments Attachment[]
+  history     NoteHistory[]
+
+  @@index([folderId])
+  @@index([isPinned])
+  @@index([isPrivate])
+  @@index([isDeleted])
+  @@index([updatedAt])
+}
+
+model Folder {
+  id        String   @id @default(cuid())
+  name      String
+  color     String   @default("default")
+  icon      String   @default("folder")
+  parentId  String?
+  parent    Folder?  @relation("FolderTree", fields: [parentId], references: [id], onDelete: SetNull)
+  children  Folder[] @relation("FolderTree")
+  order     Float    @default(0)
+  noteCount Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  notes     Note[]
+
+  @@index([parentId])
+}
+
+model Tag {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  color     String   @default("default")
+  order     Float    @default(0)
+  createdAt DateTime @default(now())
+  notes     NoteTag[]
+}
+
+model NoteTag {
+  noteId String
+  tagId  String
+  note   Note @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  tag    Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([noteId, tagId])
+}
+
+model Attachment {
+  id        String   @id @default(cuid())
+  noteId    String
+  note      Note     @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  name      String
+  mime      String   @default("application/octet-stream")
+  size      Int      @default(0)
+  // base64 data URL stored locally (on-device only)
+  dataUrl   String
+  kind      String   @default("file") // image | audio | video | file | drawing | scan
+  width     Int?
+  height    Int?
+  createdAt DateTime @default(now())
+
+  @@index([noteId])
+}
+
+model NoteHistory {
+  id        String   @id @default(cuid())
+  noteId    String
+  note      Note     @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  title     String
+  content   String
+  createdAt DateTime @default(now())
+
+  @@index([noteId])
+}
+
+model Setting {
+  key   String @id
+  value String
+}
