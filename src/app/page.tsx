@@ -9,7 +9,6 @@ import { NoteEditor } from "@/components/note-editor";
 import { NoteInfoSheet } from "@/components/note-info-sheet";
 import { useApplySettings, fetchSettings } from "@/hooks/use-settings";
 import { useSettingsStore } from "@/lib/stores";
-import { useStats } from "@/hooks/use-data";
 import { idbClearDemoNotes } from "@/lib/idb";
 
 export default function Home() {
