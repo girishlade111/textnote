@@ -93,9 +93,9 @@ export const NoteCard = memo(function NoteCard(props: NoteCardProps) {
       transition={{ duration: 0.22, ease: [0.2, 0.8, 0.2, 1] }}
       onClick={handleClick}
       className={cn(
-        "ls-ripple group relative cursor-pointer rounded-2xl border border-border/60 elev-1 hover:elev-2 transition-all overflow-hidden",
-        isSelected && "ring-2 ring-primary border-primary bg-primary/5",
-        view === "list" ? "flex gap-3 p-3 pl-8 sm:pl-9" : "flex flex-col p-4 pt-7 sm:pt-6"
+        "ls-ripple group relative cursor-pointer rounded-3xl glass-card transition-all overflow-hidden",
+        isSelected && "ring-2 ring-primary border-primary bg-primary/10 shadow-md",
+        view === "list" ? "flex gap-3 p-3.5 pl-8 sm:pl-9" : "flex flex-col p-4 pt-7 sm:pt-6"
       )}
       style={{ background: isSelected ? undefined : bg }}
       role="button"
