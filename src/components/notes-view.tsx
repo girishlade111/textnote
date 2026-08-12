@@ -100,7 +100,14 @@ export function NotesView({ notes, loading, query, emptyTitle, emptyHint, isTras
               query={query}
               isDark={isDark}
               privateUnlocked={privateUnlocked}
-              onOpen={() => openEditor(note.id)}
+              onOpen={() => {
+                if (note.isPrivate && !privateUnlocked) {
+                  toast.info("Unlock PrivateSafe to view this note");
+                  useApp.getState().setSection("private");
+                  return;
+                }
+                openEditor(note.id);
+              }}
               onTogglePin={() => {
                 updateNote.mutate({ id: note.id, isPinned: !note.isPinned });
                 toast.success(note.isPinned ? "Note unpinned" : "Note pinned");

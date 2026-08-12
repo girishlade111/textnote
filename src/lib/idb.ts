@@ -804,13 +804,25 @@ export async function idbUnlockPrivateSafe(input: {
   const settings = await idbGetSettings();
   if (!settings.privateSafeEnabled) return { ok: true };
 
-  if (input.pin && settings.privateSafePin) {
-    if (localHash(input.pin) === settings.privateSafePin) return { ok: true };
+  if (input.pin) {
+    if (!settings.privateSafePin) {
+      throw new Error("No PIN set yet. Please configure a PIN in Settings.");
+    }
+    const enteredHash = localHash(input.pin);
+    if (enteredHash === settings.privateSafePin || input.pin === settings.privateSafePin) {
+      return { ok: true };
+    }
     throw new Error("Invalid PIN");
   }
 
-  if (input.pattern && settings.privateSafePattern) {
-    if (localHash(input.pattern) === settings.privateSafePattern) return { ok: true };
+  if (input.pattern) {
+    if (!settings.privateSafePattern) {
+      throw new Error("No Pattern set yet. Please configure a Pattern in Settings.");
+    }
+    const enteredHash = localHash(input.pattern);
+    if (enteredHash === settings.privateSafePattern || input.pattern === settings.privateSafePattern) {
+      return { ok: true };
+    }
     throw new Error("Invalid Pattern");
   }
 
@@ -827,12 +839,14 @@ export async function idbVerifyPrivateSafe(input: {
 }): Promise<{ ok: boolean; method: string }> {
   const settings = await idbGetSettings();
   if (input.pin && settings.privateSafePin) {
-    const match = localHash(input.pin) === settings.privateSafePin;
+    const enteredHash = localHash(input.pin);
+    const match = enteredHash === settings.privateSafePin || input.pin === settings.privateSafePin;
     if (match) return { ok: true, method: "pin" };
     throw new Error("PIN does not match");
   }
   if (input.pattern && settings.privateSafePattern) {
-    const match = localHash(input.pattern) === settings.privateSafePattern;
+    const enteredHash = localHash(input.pattern);
+    const match = enteredHash === settings.privateSafePattern || input.pattern === settings.privateSafePattern;
     if (match) return { ok: true, method: "pattern" };
     throw new Error("Pattern does not match");
   }

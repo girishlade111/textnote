@@ -28,7 +28,7 @@ import { parseImportJson, parseMarkdown, exportNotesAsJson } from "@/lib/export"
 import { downloadFile } from "@/lib/ui-helpers";
 import { useCreateNote } from "@/hooks/use-data";
 import { idbGetNotes } from "@/lib/idb";
-import { formatFileSize } from "@/lib/notes";
+import { formatFileSize, localHash } from "@/lib/notes";
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/logo";
 
@@ -317,24 +317,23 @@ function PinSetupDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (
   const { update } = useSettings();
   const [pin, setPin] = useState("");
   const [confirm, setConfirm] = useState("");
-  const verify = useVerifyPrivateSafe();
 
   const save = () => {
     if (pin.length < 4) { toast.error("PIN must be at least 4 digits"); return; }
     if (pin !== confirm) { toast.error("PINs don't match"); return; }
-    update({ privateSafePin: pin });
-    toast.success("PIN set");
+    update({ privateSafePin: localHash(pin), privateSafeUsePin: true });
+    toast.success("PrivateSafe PIN saved");
     setPin(""); setConfirm(""); onOpenChange(false);
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="rounded-3xl max-w-sm">
         <DialogHeader><DialogTitle>Set PrivateSafe PIN</DialogTitle></DialogHeader>
         <div className="space-y-3 py-2">
           <Input type="password" inputMode="numeric" placeholder="New PIN (4-8 digits)" value={pin} onChange={(e) => setPin(e.target.value.replace(/\D/g, "").slice(0,8))} autoFocus />
           <Input type="password" inputMode="numeric" placeholder="Confirm PIN" value={confirm} onChange={(e) => setConfirm(e.target.value.replace(/\D/g, "").slice(0,8))} onKeyDown={(e) => e.key === "Enter" && save()} />
-          <p className="text-xs text-muted-foreground">The PIN is stored locally as a one-way hash. It never leaves your device.</p>
+          <p className="text-xs text-muted-foreground">The PIN is stored locally as a salted one-way hash. It never leaves your device.</p>
         </div>
         <DialogFooter>
           <Button variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>

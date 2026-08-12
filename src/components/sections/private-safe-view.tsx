@@ -49,6 +49,21 @@ function PrivateSafeGate({ onUnlock }: { onUnlock: () => void }) {
   const [error, setError] = useState("");
   const [showPin, setShowPin] = useState(false);
 
+  if (!settings.privateSafePin && !settings.privateSafePattern && !settings.privateSafeUseBiometric) {
+    return (
+      <div className="flex flex-col items-center text-center py-12 px-6 max-w-sm mx-auto">
+        <div className="h-16 w-16 rounded-2xl bg-amber-500/10 flex items-center justify-center mb-4 text-amber-500">
+          <ShieldAlert className="h-8 w-8" />
+        </div>
+        <h3 className="font-semibold text-base mb-1">Set up PIN / Security</h3>
+        <p className="text-xs text-muted-foreground mb-5">
+          PrivateSafe is enabled, but no PIN or security pattern has been set up yet. Configure your PIN in Settings.
+        </p>
+        <Button onClick={() => useApp.getState().setSection("settings")}>Set up PIN in Settings</Button>
+      </div>
+    );
+  }
+
   const submitPin = () => {
     if (pin.length < 4) { setError("Enter at least 4 digits"); return; }
     unlockMut.mutate({ pin }, {
