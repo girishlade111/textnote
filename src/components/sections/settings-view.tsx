@@ -348,8 +348,7 @@ function BackupImportSection() {
   const fileRef = useRef<HTMLInputElement>(null);
 
   const handleBackup = async () => {
-    const res = await fetch("/api/notes");
-    const notes = await res.json();
+    const notes = await idbGetNotes({ scope: "all" });
     downloadFile(`LS_Notes_Backup_${new Date().toISOString().slice(0,10)}.json`, exportNotesAsJson(notes), "application/json");
     toast.success("Backup created");
   };
