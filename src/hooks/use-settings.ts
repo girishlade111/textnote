@@ -5,21 +5,19 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSettingsStore } from "@/lib/stores";
 import type { AppSettings } from "@/lib/types";
 import { DEFAULT_SETTINGS } from "@/lib/types";
+import { idbGetSettings, idbUpdateSettings } from "@/lib/idb";
 
 export async function fetchSettings(): Promise<AppSettings> {
-  const res = await fetch("/api/settings");
-  if (!res.ok) return DEFAULT_SETTINGS;
-  const data = await res.json();
-  return { ...DEFAULT_SETTINGS, ...data };
+  if (typeof window === "undefined") return DEFAULT_SETTINGS;
+  try {
+    return await idbGetSettings();
+  } catch {
+    return DEFAULT_SETTINGS;
+  }
 }
 
-async function putSettings(partial: Partial<AppSettings>) {
-  const res = await fetch("/api/settings", {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(partial),
-  });
-  return res.json();
+async function putSettings(partial: Partial<AppSettings>): Promise<AppSettings> {
+  return idbUpdateSettings(partial);
 }
 
 export function useSettings() {
