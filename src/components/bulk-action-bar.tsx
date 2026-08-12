@@ -129,19 +129,19 @@ export function BulkActionBar({ notes, isTrashView }: BulkActionBarProps) {
           transition={{ type: "spring", stiffness: 400, damping: 30 }}
           className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 max-w-xl w-[92vw] sm:w-auto"
         >
-          <div className="flex items-center gap-1.5 sm:gap-2 px-3 py-2.5 rounded-full bg-foreground text-background shadow-2xl border border-border/20 backdrop-blur-md">
+          <div className="flex items-center gap-1.5 sm:gap-2 px-3.5 py-2.5 rounded-full glass-panel shadow-2xl text-foreground">
             {/* Selected Count & Toggle All */}
             <Button
               variant="ghost"
               size="sm"
               onClick={handleSelectAll}
-              className="text-background hover:bg-background/20 rounded-full h-8 px-2.5 text-xs font-medium"
+              className="hover:bg-accent/60 rounded-full h-8 px-3 text-xs font-medium"
             >
-              {allSelected ? <CheckSquare className="h-4 w-4 mr-1 text-primary-foreground" /> : <Square className="h-4 w-4 mr-1" />}
+              {allSelected ? <CheckSquare className="h-4 w-4 mr-1.5 text-primary" /> : <Square className="h-4 w-4 mr-1.5 text-muted-foreground" />}
               {selectedCount} selected
             </Button>
 
-            <div className="h-4 w-px bg-background/20 mx-0.5" />
+            <div className="h-4 w-px bg-border/60 mx-0.5" />
 
             {/* Batch Actions */}
             {selectedCount > 0 && (
@@ -150,7 +150,7 @@ export function BulkActionBar({ notes, isTrashView }: BulkActionBarProps) {
                   variant="ghost"
                   size="icon"
                   onClick={() => handlePin(true)}
-                  className="text-background hover:bg-background/20 rounded-full h-8 w-8"
+                  className="hover:bg-accent/60 rounded-full h-8 w-8"
                   title="Pin selected"
                 >
                   <Pin className="h-4 w-4" />
@@ -160,7 +160,7 @@ export function BulkActionBar({ notes, isTrashView }: BulkActionBarProps) {
                   variant="ghost"
                   size="icon"
                   onClick={() => setMoveOpen(true)}
-                  className="text-background hover:bg-background/20 rounded-full h-8 w-8"
+                  className="hover:bg-accent/60 rounded-full h-8 w-8"
                   title="Move to folder"
                 >
                   <FolderInput className="h-4 w-4" />
@@ -170,7 +170,7 @@ export function BulkActionBar({ notes, isTrashView }: BulkActionBarProps) {
                   variant="ghost"
                   size="icon"
                   onClick={() => setTagOpen(true)}
-                  className="text-background hover:bg-background/20 rounded-full h-8 w-8"
+                  className="hover:bg-accent/60 rounded-full h-8 w-8"
                   title="Add / change tags"
                 >
                   <TagIcon className="h-4 w-4" />
@@ -180,7 +180,7 @@ export function BulkActionBar({ notes, isTrashView }: BulkActionBarProps) {
                   variant="ghost"
                   size="icon"
                   onClick={handleExport}
-                  className="text-background hover:bg-background/20 rounded-full h-8 w-8"
+                  className="hover:bg-accent/60 rounded-full h-8 w-8"
                   title="Export selected"
                 >
                   <Download className="h-4 w-4" />
@@ -190,22 +190,22 @@ export function BulkActionBar({ notes, isTrashView }: BulkActionBarProps) {
                   variant="ghost"
                   size="icon"
                   onClick={handleDelete}
-                  className="text-destructive-foreground hover:bg-destructive/30 rounded-full h-8 w-8"
+                  className="hover:bg-destructive/20 text-destructive rounded-full h-8 w-8"
                   title={isTrashView ? "Permanently delete" : "Move to Trash"}
                 >
-                  <Trash2 className="h-4 w-4 text-red-400" />
+                  <Trash2 className="h-4 w-4" />
                 </Button>
               </>
             )}
 
-            <div className="h-4 w-px bg-background/20 mx-0.5" />
+            <div className="h-4 w-px bg-border/60 mx-0.5" />
 
             {/* Close button */}
             <Button
               variant="ghost"
               size="icon"
               onClick={clear}
-              className="text-background hover:bg-background/20 rounded-full h-8 w-8"
+              className="hover:bg-accent/60 rounded-full h-8 w-8"
               title="Close selection"
             >
               <X className="h-4 w-4" />
@@ -216,7 +216,7 @@ export function BulkActionBar({ notes, isTrashView }: BulkActionBarProps) {
 
       {/* Batch Move Dialog */}
       <Dialog open={moveOpen} onOpenChange={setMoveOpen}>
-        <DialogContent className="max-w-xs rounded-2xl">
+        <DialogContent className="max-w-xs rounded-3xl glass-dialog">
           <DialogHeader>
             <DialogTitle>Move {selectedCount} notes</DialogTitle>
           </DialogHeader>
