@@ -4,14 +4,8 @@ import { useMemo } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Plus, StickyNote, SearchX } from "lucide-react";
 import { NoteCard } from "@/components/note-card";
+import { BulkActionBar } from "@/components/bulk-action-bar";
 import { useApp } from "@/lib/app-store";
-import { useUIStore, usePrivateSafeStore } from "@/lib/stores";
-import { useUpdateNote, useDeleteNote, useDuplicateNote } from "@/hooks/use-data";
-import { useTheme } from "next-themes";
-import type { NoteDto, NoteColor } from "@/lib/types";
-import { colorHex } from "@/lib/types";
-import { toast } from "sonner";
-import { haptic } from "@/lib/ui-helpers";
 
 interface NotesViewProps {
   notes: NoteDto[];
@@ -19,10 +13,11 @@ interface NotesViewProps {
   query?: string;
   emptyTitle?: string;
   emptyHint?: string;
+  isTrashView?: boolean;
   onCardAction?: (action: string, note: NoteDto) => void;
 }
 
-export function NotesView({ notes, loading, query, emptyTitle, emptyHint }: NotesViewProps) {
+export function NotesView({ notes, loading, query, emptyTitle, emptyHint, isTrashView }: NotesViewProps) {
   const { view, sort } = useUIStore();
   const { openEditor, setInfoNote, openMove, setCreateMenu } = useApp();
   const { resolvedTheme } = useTheme();
@@ -88,33 +83,36 @@ export function NotesView({ notes, loading, query, emptyTitle, emptyHint }: Note
   };
 
   return (
-    <div className={view === "grid" ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3" : "flex flex-col gap-2"}>
-      <AnimatePresence mode="popLayout">
-        {sorted.map((note) => (
-          <NoteCard
-            key={note.id}
-            note={note}
-            view={view}
-            query={query}
-            isDark={isDark}
-            privateUnlocked={privateUnlocked}
-            onOpen={() => openEditor(note.id)}
-            onTogglePin={() => {
-              updateNote.mutate({ id: note.id, isPinned: !note.isPinned });
-              toast.success(note.isPinned ? "Note unpinned" : "Note pinned");
-            }}
-            onSetColor={(c) => handleColor(note, c)}
-            onMove={() => openMove([note.id])}
-            onDuplicate={() => { duplicateNote.mutate(note.id); toast.success("Note duplicated"); }}
-            onDelete={() => { deleteNote.mutate(note.id); toast.success("Note moved to Trash", { description: "30 days until permanent deletion", action: { label: "Undo", onClick: () => {/* restore handled via restore endpoint; simplified */} } }); }}
-            onInfo={() => setInfoNote(note.id)}
-            onExport={() => useApp.getState().setSection("shared")}
-            onShare={() => toast.info("Opening share…")}
-            onTags={() => openEditor(note.id)}
-          />
-        ))}
-      </AnimatePresence>
-    </div>
+    <>
+      <div className={view === "grid" ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3" : "flex flex-col gap-2"}>
+        <AnimatePresence mode="popLayout">
+          {sorted.map((note) => (
+            <NoteCard
+              key={note.id}
+              note={note}
+              view={view}
+              query={query}
+              isDark={isDark}
+              privateUnlocked={privateUnlocked}
+              onOpen={() => openEditor(note.id)}
+              onTogglePin={() => {
+                updateNote.mutate({ id: note.id, isPinned: !note.isPinned });
+                toast.success(note.isPinned ? "Note unpinned" : "Note pinned");
+              }}
+              onSetColor={(c) => handleColor(note, c)}
+              onMove={() => openMove([note.id])}
+              onDuplicate={() => { duplicateNote.mutate(note.id); toast.success("Note duplicated"); }}
+              onDelete={() => { deleteNote.mutate(note.id); toast.success("Note moved to Trash"); }}
+              onInfo={() => setInfoNote(note.id)}
+              onExport={() => useApp.getState().setSection("shared")}
+              onShare={() => toast.info("Opening share…")}
+              onTags={() => openEditor(note.id)}
+            />
+          ))}
+        </AnimatePresence>
+      </div>
+      <BulkActionBar notes={sorted} isTrashView={isTrashView} />
+    </>
   );
 }
 

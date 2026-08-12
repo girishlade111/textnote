@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import {
   Search, LayoutGrid, List, SlidersHorizontal, Plus, Menu, X, ShieldCheck,
   StickyNote, Folder, Tag, Pin, Clock, Share2, Trash2, Settings as SettingsIcon,
-  ChevronDown, Sparkles,
+  ChevronDown, Sparkles, CheckSquare,
 } from "lucide-react";
 import { useApp } from "@/lib/app-store";
 import { useUIStore, useSettingsStore, usePrivateSafeStore, useSelectionStore } from "@/lib/stores";
@@ -105,6 +105,24 @@ export function AppShell({ children }: AppShellProps) {
               <List className="h-4 w-4" />
             </button>
           </div>
+
+          {/* Select notes toggle */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => {
+              if (useSelectionStore.getState().selecting) {
+                useSelectionStore.getState().clear();
+              } else {
+                useSelectionStore.getState().start();
+              }
+            }}
+            className={cn("ls-ripple rounded-full", useSelectionStore.getState().selecting && "bg-primary text-primary-foreground")}
+            aria-label="Select notes"
+            title="Select multiple notes"
+          >
+            <CheckSquare className="h-4 w-4" />
+          </Button>
 
           {/* sort & filter */}
           <DropdownMenu>

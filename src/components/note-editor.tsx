@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { useApp } from "@/lib/app-store";
 import { useSettingsStore } from "@/lib/stores";
-import { useNote, useCreateNote, useUpdateNote, useDeleteNote, useDuplicateNote, useFolders, useTags, useCreateTag } from "@/hooks/use-data";
+import { useNote, useCreateNote, useUpdateNote, useDeleteNote, useDuplicateNote, useFolders, useTags, useCreateTag, useNoteHistory, useRestoreHistoryNote } from "@/hooks/use-data";
 import { serializeBlocks, blocksToExcerpt, checklistProgress, relativeTime, formatDateTime, uid } from "@/lib/notes";
 import { colorHex, colorBg, NOTE_COLORS, FONT_OPTIONS, type NoteColor, type ContentBlock, type NoteType } from "@/lib/types";
 import { useTheme } from "next-themes";
@@ -33,6 +33,8 @@ export function NoteEditor() {
   const settings = useSettingsStore((s) => s.settings);
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === "dark";
+
+  const activeNoteId = noteId || (loadedId && loadedId !== "new" ? loadedId : null);
 
   if (!editorOpen) return null;
 
@@ -147,6 +149,7 @@ function EditorInner({ noteId, newType, newColor, newFolderId, newPrivate, isDar
       } else {
         const created = await createNote.mutateAsync({ ...payload, color, colorMode: settings.defaultNoteColorMode });
         createdRef.current = created.id;
+        setLoadedId(created.id);
       }
       setSaved("saved");
       setDirty(false);
@@ -358,6 +361,9 @@ function EditorInner({ noteId, newType, newColor, newFolderId, newPrivate, isDar
 
       {/* Link review */}
       <LinkReviewDialog open={linkReviewOpen} onOpenChange={setLinkReviewOpen} blocks={blocks} />
+
+      {/* Note history */}
+      <NoteHistoryDialog open={historyOpen} onOpenChange={setHistoryOpen} noteId={activeNoteId} onRestored={(t: string, b: ContentBlock[]) => { setTitle(t); setBlocks(b); markDirty(); }} />
     </div>
   );
 }
@@ -838,6 +844,70 @@ function LinkReviewDialog({ open, onOpenChange, blocks }: any) {
           ))}
         </div>
         <div className="text-xs text-muted-foreground">Total links: {dedup.length}</div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// Note history revision dialog
+function NoteHistoryDialog({ open, onOpenChange, noteId, onRestored }: any) {
+  const { data: history, isLoading } = useNoteHistory(open ? noteId : null);
+  const restore = useRestoreHistoryNote();
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md rounded-2xl">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Clock className="h-5 w-5 text-primary" /> Revision History
+          </DialogTitle>
+        </DialogHeader>
+        <p className="text-xs text-muted-foreground">
+          Local revision snapshots are captured on save. Select a version to restore.
+        </p>
+        <div className="space-y-2.5 max-h-80 overflow-y-auto py-2 pr-1">
+          {isLoading && <div className="text-sm text-muted-foreground p-4 text-center">Loading revisions…</div>}
+          {!isLoading && (!history || history.length === 0) && (
+            <div className="text-sm text-muted-foreground p-4 text-center">No past revisions recorded yet for this note.</div>
+          )}
+          {history?.map((snap: any) => {
+            const excerpt = blocksToExcerpt(snap.content);
+            return (
+              <div key={snap.id} className="flex items-start justify-between gap-3 p-3 rounded-xl border border-border/70 bg-card hover:border-primary/50 transition-colors">
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-sm truncate">{snap.title || "Untitled"}</span>
+                    <span className="text-[10px] text-muted-foreground shrink-0">{relativeTime(snap.createdAt)}</span>
+                  </div>
+                  <div className="text-xs text-muted-foreground/80 line-clamp-2 mt-0.5">{excerpt || "Empty note content"}</div>
+                  <div className="text-[10px] text-muted-foreground/50 mt-1">{formatDateTime(snap.createdAt)}</div>
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="shrink-0 rounded-full h-8 px-3 text-xs"
+                  onClick={() => {
+                    if (!noteId) return;
+                    restore.mutate(
+                      { noteId, historyId: snap.id },
+                      {
+                        onSuccess: (data) => {
+                          onRestored(data.title, data.content);
+                          onOpenChange(false);
+                          toast.success("Restored version from " + relativeTime(snap.createdAt));
+                        },
+                        onError: () => toast.error("Failed to restore history snapshot"),
+                      }
+                    );
+                  }}
+                  disabled={restore.isPending}
+                >
+                  Restore
+                </Button>
+              </div>
+            );
+          })}
+        </div>
       </DialogContent>
     </Dialog>
   );

@@ -10,7 +10,7 @@ import {
 import type { NoteDto, NoteColor } from "@/lib/types";
 import { colorHex, colorBg } from "@/lib/types";
 import { relativeTime, formatDateTime, checklistProgress, hasAttachment, highlightMatch } from "@/lib/notes";
-import { useSettingsStore } from "@/lib/stores";
+import { useSettingsStore, useSelectionStore } from "@/lib/stores";
 import { cn } from "@/lib/utils";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
@@ -59,6 +59,9 @@ function Highlighted({ text, query }: { text: string; query?: string }) {
 export const NoteCard = memo(function NoteCard(props: NoteCardProps) {
   const { note, view, query, isDark, privateUnlocked, onOpen, onTogglePin, onSetColor, onMove, onDuplicate, onDelete, onInfo, onExport, onShare, onTags } = props;
   const settings = useSettingsStore((s) => s.settings);
+  const { selected, selecting, toggle, start } = useSelectionStore();
+  const isSelected = selected.has(note.id);
+
   const TypeIcon = TYPE_ICON[note.type] || FileText;
   const progress = checklistProgress(note.content);
   const atts = hasAttachment(note.content);
@@ -73,6 +76,14 @@ export const NoteCard = memo(function NoteCard(props: NoteCardProps) {
   const title = note.title || "Untitled";
   const excerpt = isPrivateLocked ? "Private note — unlock to view" : note.excerpt || "No additional text";
 
+  const handleClick = () => {
+    if (selecting) {
+      toggle(note.id);
+    } else {
+      onOpen();
+    }
+  };
+
   const content = (
     <motion.article
       layout
@@ -80,21 +91,40 @@ export const NoteCard = memo(function NoteCard(props: NoteCardProps) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.96 }}
       transition={{ duration: 0.22, ease: [0.2, 0.8, 0.2, 1] }}
-      onClick={onOpen}
+      onClick={handleClick}
       className={cn(
-        "ls-ripple group relative cursor-pointer rounded-2xl border border-border/60 elev-1 hover:elev-2 transition-shadow overflow-hidden",
-        view === "list" ? "flex gap-3 p-3" : "flex flex-col p-4"
+        "ls-ripple group relative cursor-pointer rounded-2xl border border-border/60 elev-1 hover:elev-2 transition-all overflow-hidden",
+        isSelected && "ring-2 ring-primary border-primary bg-primary/5",
+        view === "list" ? "flex gap-3 p-3 pl-8 sm:pl-9" : "flex flex-col p-4 pt-7 sm:pt-6"
       )}
-      style={{ background: bg }}
+      style={{ background: isSelected ? undefined : bg }}
       role="button"
       tabIndex={0}
       aria-label={`Note: ${title}`}
-      onKeyDown={(e) => { if (e.key === "Enter") onOpen(); }}
+      onKeyDown={(e) => { if (e.key === "Enter") handleClick(); }}
     >
       {/* color stripe */}
       {note.color !== "default" && (
         <span className="ls-color-stripe" style={{ background: stripe }} aria-hidden />
       )}
+
+      {/* selection checkbox */}
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          if (!selecting) start();
+          toggle(note.id);
+        }}
+        className={cn(
+          "absolute top-2 left-2 z-10 rounded-md p-1 transition-opacity",
+          selecting || isSelected ? "opacity-100" : "opacity-0 group-hover:opacity-100 focus:opacity-100 hover:bg-foreground/5"
+        )}
+        aria-label={isSelected ? "Deselect note" : "Select note"}
+      >
+        <div className={cn("h-4 w-4 rounded border flex items-center justify-center transition-colors", isSelected ? "bg-primary border-primary text-primary-foreground" : "border-muted-foreground/60 bg-background/80")}>
+          {isSelected && <CheckSquare className="h-3 w-3" />}
+        </div>
+      </button>
 
       {/* pinned / private badges */}
       <div className={cn("flex items-start justify-between gap-2", view === "list" && "flex-1 min-w-0")}>
@@ -112,8 +142,8 @@ export const NoteCard = memo(function NoteCard(props: NoteCardProps) {
 
       {/* excerpt */}
       <p className={cn(
-        "text-muted-foreground leading-snug mt-1.5",
-        view === "list" ? "text-xs line-clamp-1" : "text-[13px] line-clamp-3",
+        "text-muted-foreground/80 leading-relaxed mt-1",
+        view === "list" ? "text-xs line-clamp-1" : "text-xs line-clamp-3",
         isPrivateLocked && "italic"
       )}>
         <Highlighted text={excerpt} query={isPrivateLocked ? undefined : query} />
@@ -121,10 +151,10 @@ export const NoteCard = memo(function NoteCard(props: NoteCardProps) {
 
       {/* checklist progress */}
       {progress.total > 0 && !isPrivateLocked && (
-        <div className="mt-2 flex items-center gap-2">
+        <div className="mt-2.5 flex items-center gap-2">
           <div className="h-1.5 flex-1 rounded-full bg-muted overflow-hidden">
             <div
-              className="h-full rounded-full bg-primary transition-all"
+              className="h-full rounded-full bg-primary transition-all duration-300"
               style={{ width: `${progress.total ? (progress.done / progress.total) * 100 : 0}%` }}
             />
           </div>
@@ -190,7 +220,9 @@ export const NoteCard = memo(function NoteCard(props: NoteCardProps) {
   const menuItems = (
     <>
       <ContextMenuItem onClick={onOpen}>Open</ContextMenuItem>
-      <ContextMenuItem onClick={onOpen}>Edit</ContextMenuItem>
+      <ContextMenuItem onClick={() => { if (!selecting) start(); toggle(note.id); }}>
+        {isSelected ? "Deselect" : "Select"}
+      </ContextMenuItem>
       <ContextMenuSeparator />
       <ContextMenuItem onClick={onTogglePin}>{note.isPinned ? "Unpin" : "Pin"}</ContextMenuItem>
       <ContextMenuItem onClick={onTags}>Add / edit tags…</ContextMenuItem>
@@ -232,6 +264,9 @@ export const NoteCard = memo(function NoteCard(props: NoteCardProps) {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuItem onClick={onOpen}>Open</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => { if (!selecting) start(); toggle(note.id); }}>
+                {isSelected ? "Deselect" : "Select"}
+              </DropdownMenuItem>
               <DropdownMenuItem onClick={onTogglePin}>{note.isPinned ? "Unpin" : "Pin"}</DropdownMenuItem>
               <DropdownMenuItem onClick={onTags}>Tags…</DropdownMenuItem>
               <DropdownMenuItem onClick={onMove}>Move…</DropdownMenuItem>

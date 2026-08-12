@@ -342,3 +342,74 @@ export function useVerifyPrivateSafe() {
     },
   });
 }
+
+// ---------- Note History ----------
+export interface HistorySnapshotDto {
+  id: string;
+  title: string;
+  content: ContentBlock[];
+  createdAt: string;
+}
+
+export function useNoteHistory(noteId: string | null) {
+  return useQuery({
+    queryKey: ["history", noteId],
+    queryFn: async () => {
+      if (!noteId) return [];
+      const res = await fetch(`/api/history/${noteId}`);
+      if (!res.ok) return [];
+      return res.json() as Promise<HistorySnapshotDto[]>;
+    },
+    enabled: !!noteId,
+  });
+}
+
+export function useRestoreHistoryNote() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ noteId, historyId }: { noteId: string; historyId: string }) => {
+      const res = await fetch(`/api/history/${noteId}/restore`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ historyId }),
+      });
+      if (!res.ok) throw new Error("Failed to restore history snapshot");
+      return res.json() as Promise<NoteDto>;
+    },
+    onSuccess: (data) => {
+      qc.invalidateQueries({ queryKey: ["notes"] });
+      qc.invalidateQueries({ queryKey: ["note", data.id] });
+      qc.invalidateQueries({ queryKey: ["history", data.id] });
+    },
+  });
+}
+
+// ---------- Bulk Note Actions ----------
+export interface BulkActionInput {
+  action: "pin" | "unpin" | "move" | "tag" | "trash" | "restore" | "delete";
+  noteIds: string[];
+  folderId?: string | null;
+  tagNames?: string[];
+}
+
+export function useBulkNotesAction() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: BulkActionInput) => {
+      const res = await fetch("/api/notes/bulk", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(input),
+      });
+      if (!res.ok) throw new Error("Bulk action failed");
+      return res.json();
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["notes"] });
+      qc.invalidateQueries({ queryKey: ["stats"] });
+      qc.invalidateQueries({ queryKey: ["folders"] });
+      qc.invalidateQueries({ queryKey: ["tags"] });
+    },
+  });
+}
+

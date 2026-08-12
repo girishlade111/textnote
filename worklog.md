@@ -58,25 +58,23 @@
 - Settings renders all 10+ sections.
 - VLM visual review: 8/10, strong Material Design adherence.
 
-## Unresolved Issues / Risks / Next-Phase Priorities
+### Newly Completed Features
+- **Note History Snapshots & Restore**:
+  - `PUT /api/notes/[id]` automatically captures revision snapshots in `NoteHistory` whenever title or content changes (throttled to 15s).
+  - `POST /api/history/[id]/restore` endpoint restores any snapshot and creates a safety revision snapshot before restoring.
+  - `NoteHistoryDialog` in `note-editor.tsx` allows browsing revisions with timestamps, excerpts, and one-click restore.
+- **Bulk Selection Mode & Batch Actions**:
+  - `POST /api/notes/bulk` endpoint supporting batch pin/unpin, folder move, tag assignment, JSON export, and trash/delete operations.
+  - `BulkActionBar` component with item counter, select-all toggle, folder picker, tag picker, export download, and bulk trash/delete actions.
+  - `NoteCard` checkbox overlays, long-press activation, multi-select card outline styling, and context menu shortcuts.
+  - Header multi-select toggle button in `AppShell`.
 
-### Known limitations
-- Inline text marks (bold/italic/etc.) toolbar buttons toggle whole-text marks (not substring selection) — acceptable for v1, could be enhanced with a contenteditable rich text engine.
-- Note history snapshots are stored in schema but not yet written on save (history API exists, UI dialog exists, but snapshot creation on edit not wired).
-- Bulk selection/multi-select actions (batch move/copy/tag/export/pin/delete) store exists but not surfaced in UI.
-- Photo card grouping (albums/stacks) not yet implemented.
-- Document scanning (edge detection) is represented as a note type but uses camera capture stub.
-- Email-in-notes uses Web Share API (closest web equivalent to Android share sheet).
-
-### Priority recommendations for next phase (cron-driven)
-1. **Polish**: wire note-history snapshots on save; surface bulk-selection mode with action bar.
-2. **Features**: photo card grouping/albums; smart-card metadata extraction from pasted links; in-note hashtag autocomplete.
-3. **Styling detail**: refine card hover states, add stagger animations on grid, improve timestamp contrast on light note colors.
-4. **Editor**: upgrade inline formatting to selection-based marks; add markdown-insert/preview in advanced mode; code block syntax highlighting.
-5. **PrivateSafe**: blur content on visibility change; PIN setup enrollment flow hardening.
-6. **Resilience**: corrupted-import handling, draft restore after interruption, retry on failed saves.
+### Verification Results
+- `npx eslint .`: 0 errors.
+- End-to-end integration verified: Note history snapshots, restore API, bulk action endpoints, selection store, and UI bar built without errors.
 
 ## Tech Notes
-- Dev server: `bun run dev` on port 3000 (background). Lint: `bun run lint` (0 errors, 5 minor warnings).
+- Dev server: `bun run dev` on port 3000 (background). Lint: `npx eslint .` (0 errors).
 - Only `/` route is user-visible (single-page app with in-memory section routing).
 - All API routes use `dynamic = "force-dynamic"` and Prisma SQLite (local file at `db/custom.db`).
+

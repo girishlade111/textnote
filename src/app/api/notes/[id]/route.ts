@@ -39,6 +39,28 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   if (body.isArchived !== undefined) data.isArchived = body.isArchived;
   if (body.type !== undefined) data.type = body.type;
 
+  // Record note history snapshot if content or title changed
+  if ((body.title !== undefined && body.title !== existing.title) || (body.content !== undefined && JSON.stringify(body.content) !== existing.content)) {
+    const lastHistory = await db.noteHistory.findFirst({
+      where: { noteId: id },
+      orderBy: { createdAt: "desc" },
+    });
+    const now = Date.now();
+    const lastTime = lastHistory ? new Date(lastHistory.createdAt).getTime() : 0;
+    // Snapshot if no history exists or last snapshot was over 15 seconds ago
+    if (!lastHistory || now - lastTime > 15000) {
+      if (existing.title.trim() || existing.content !== "[]") {
+        await db.noteHistory.create({
+          data: {
+            noteId: id,
+            title: existing.title || "Untitled",
+            content: existing.content,
+          },
+        });
+      }
+    }
+  }
+
   const updated = await db.note.update({
     where: { id },
     data,
