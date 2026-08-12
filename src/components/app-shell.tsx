@@ -53,15 +53,15 @@ export function AppShell({ children }: AppShellProps) {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       {/* Top bar */}
-      <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-xl border-b border-border/60">
-        <div className="flex items-center gap-2 px-3 sm:px-4 h-14">
+      <header className="sticky top-0 z-30 glass-header">
+        <div className="flex items-center gap-2 px-3 sm:px-5 h-14">
           {/* mobile drawer trigger */}
           <Button variant="ghost" size="icon" className="lg:hidden ls-ripple rounded-full" onClick={() => setDrawerOpen(true)} aria-label="Open menu">
             <Menu className="h-5 w-5" />
           </Button>
 
           {/* logo (desktop) */}
-          <div className="hidden lg:flex items-center gap-2 pr-2">
+          <div className="hidden lg:flex items-center gap-2.5 pr-3">
             <Logo size={32} className="text-primary" />
             <div className="leading-tight">
               <div className="font-bold text-[15px] tracking-tight">LS Notes</div>
@@ -72,12 +72,12 @@ export function AppShell({ children }: AppShellProps) {
           {/* search */}
           <div className="flex-1 max-w-2xl mx-auto">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
               <Input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search notes, tags, folders…"
-                className="pl-9 pr-9 h-10 rounded-full bg-muted/60 border-transparent focus-visible:bg-background focus-visible:border-border"
+                className="pl-10 pr-9 h-10 rounded-full bg-muted/50 border-border/40 backdrop-blur-md focus-visible:bg-background focus-visible:border-primary/60 transition-all"
                 aria-label="Search notes"
               />
               {search && (
@@ -89,17 +89,17 @@ export function AppShell({ children }: AppShellProps) {
           </div>
 
           {/* view toggle */}
-          <div className="hidden sm:flex items-center rounded-full bg-muted/60 p-0.5">
+          <div className="hidden sm:flex items-center rounded-full bg-muted/50 p-1 border border-border/40 backdrop-blur-md">
             <button
               onClick={() => setView("grid")}
-              className={cn("p-1.5 rounded-full transition-colors", view === "grid" ? "bg-background text-foreground elev-1" : "text-muted-foreground")}
+              className={cn("p-1.5 rounded-full transition-all", view === "grid" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground")}
               aria-label="Grid view"
             >
               <LayoutGrid className="h-4 w-4" />
             </button>
             <button
               onClick={() => setView("list")}
-              className={cn("p-1.5 rounded-full transition-colors", view === "list" ? "bg-background text-foreground elev-1" : "text-muted-foreground")}
+              className={cn("p-1.5 rounded-full transition-all", view === "list" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground")}
               aria-label="List view"
             >
               <List className="h-4 w-4" />
@@ -131,7 +131,7 @@ export function AppShell({ children }: AppShellProps) {
                 <SlidersHorizontal className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-52">
+            <DropdownMenuContent align="end" className="w-52 glass-dialog rounded-2xl">
               <div className="px-2 py-1.5 text-xs font-medium text-muted-foreground">Sort by</div>
               {([
                 ["updated", "Last modified"],
@@ -141,7 +141,7 @@ export function AppShell({ children }: AppShellProps) {
                 ["folder", "Folder"],
                 ["pinned", "Pinned status"],
               ] as const).map(([v, label]) => (
-                <DropdownMenuItem key={v} onClick={() => setSort(v)} className={cn(sort === v && "bg-accent text-accent-foreground")}>
+                <DropdownMenuItem key={v} onClick={() => setSort(v)} className={cn("rounded-xl", sort === v && "bg-accent text-accent-foreground font-medium")}>
                   {label}
                 </DropdownMenuItem>
               ))}
@@ -152,16 +152,16 @@ export function AppShell({ children }: AppShellProps) {
 
       <div className="flex-1 flex">
         {/* Desktop sidebar */}
-        <aside className="hidden lg:flex w-60 shrink-0 flex-col border-r border-border/60 bg-sidebar/40 p-3 gap-1 sticky top-14 h-[calc(100vh-3.5rem)]">
+        <aside className="hidden lg:flex w-64 shrink-0 flex-col glass-sidebar p-3.5 gap-1.5 sticky top-14 h-[calc(100vh-3.5rem)]">
           <Button
             onClick={() => { haptic(); setCreateMenu(true); }}
-            className="w-full justify-start gap-2.5 h-11 rounded-2xl bg-primary text-primary-foreground font-semibold elev-1 ls-ripple hover:scale-[1.02] active:scale-[0.98] transition-all mb-2 shadow-sm"
+            className="w-full justify-start gap-2.5 h-12 rounded-2xl glass-fab font-semibold hover:scale-[1.02] active:scale-[0.98] transition-all mb-2"
           >
             <Plus className="h-5 w-5" />
             <span>New Note</span>
           </Button>
           <SideNav section={section} onSelect={setSection} />
-          <div className="mt-auto p-3 rounded-2xl bg-accent/40 text-xs text-muted-foreground">
+          <div className="mt-auto p-3.5 rounded-2xl glass-panel text-xs text-muted-foreground">
             <div className="flex items-center gap-1.5 font-medium text-foreground mb-1">
               <ShieldCheck className="h-3.5 w-3.5 text-primary" /> Private by design
             </div>
@@ -171,7 +171,7 @@ export function AppShell({ children }: AppShellProps) {
 
         {/* Mobile drawer */}
         <Sheet open={drawerOpen} onOpenChange={setDrawerOpen}>
-          <SheetContent side="left" className="w-72 p-3 flex flex-col">
+          <SheetContent side="left" className="w-72 p-4 flex flex-col glass-panel border-r-border/60">
             <SheetHeader className="mb-2">
               <SheetTitle className="flex items-center gap-2">
                 <Logo size={28} className="text-primary" /> LS Notes
@@ -179,7 +179,7 @@ export function AppShell({ children }: AppShellProps) {
             </SheetHeader>
             <Button
               onClick={() => { haptic(); setDrawerOpen(false); setCreateMenu(true); }}
-              className="w-full justify-start gap-2.5 h-11 rounded-2xl bg-primary text-primary-foreground font-semibold elev-1 ls-ripple mb-2"
+              className="w-full justify-start gap-2.5 h-12 rounded-2xl glass-fab font-semibold mb-2"
             >
               <Plus className="h-5 w-5" />
               <span>New Note</span>
@@ -203,7 +203,7 @@ export function AppShell({ children }: AppShellProps) {
       {/* Floating Action Button (FAB) */}
       <button
         onClick={() => { haptic(); setCreateMenu(true); }}
-        className="fixed bottom-20 lg:bottom-6 right-4 sm:right-6 z-40 h-14 w-14 rounded-2xl bg-primary text-primary-foreground elev-2 ls-ripple flex items-center justify-center hover:scale-105 active:scale-95 transition-transform shadow-lg"
+        className="fixed bottom-20 lg:bottom-6 right-4 sm:right-6 z-40 h-14 w-14 rounded-2xl glass-fab flex items-center justify-center"
         aria-label="Create note (+)"
         title="Create note (+)"
       >
@@ -211,7 +211,7 @@ export function AppShell({ children }: AppShellProps) {
       </button>
 
       {/* Bottom nav (mobile) */}
-      <nav className="lg:hidden fixed bottom-0 inset-x-0 z-30 bg-background/90 backdrop-blur-xl border-t border-border/60 pb-[env(safe-area-inset-bottom)]">
+      <nav className="lg:hidden fixed bottom-0 inset-x-0 z-30 glass-header pb-[env(safe-area-inset-bottom)]">
         <div className="flex items-center justify-around h-16">
           {PRIMARY_SECTIONS.map((s) => {
             const Icon = s.icon;
@@ -221,13 +221,13 @@ export function AppShell({ children }: AppShellProps) {
                 key={s.id}
                 onClick={() => { haptic(); setSection(s.id); }}
                 className={cn(
-                  "flex flex-col items-center justify-center gap-0.5 h-full flex-1 text-[10px] font-medium ls-ripple rounded-lg",
-                  active ? "text-primary" : "text-muted-foreground"
+                  "flex flex-col items-center justify-center gap-0.5 h-full flex-1 text-[10px] font-medium ls-ripple rounded-xl transition-all",
+                  active ? "text-primary font-semibold" : "text-muted-foreground"
                 )}
                 aria-label={s.label}
                 aria-current={active ? "page" : undefined}
               >
-                <span className={cn("p-1.5 rounded-xl transition-colors", active && "bg-accent")}>
+                <span className={cn("p-2 rounded-2xl transition-all", active && "ls-nav-active shadow-sm")}>
                   <Icon className="h-5 w-5" />
                 </span>
                 <span className="truncate max-w-[60px]">{s.label.split(" ")[0]}</span>
@@ -323,8 +323,8 @@ function NavItem({
     <button
       onClick={() => { haptic(); onClick(); }}
       className={cn(
-        "flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-medium ls-ripple text-left transition-colors",
-        active ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+        "flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-sm font-medium ls-ripple text-left transition-all",
+        active ? "ls-nav-active font-semibold shadow-sm" : "text-muted-foreground hover:bg-accent/40 hover:text-foreground"
       )}
       aria-current={active ? "page" : undefined}
     >
