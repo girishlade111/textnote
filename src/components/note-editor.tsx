@@ -224,13 +224,13 @@ function EditorInner({ noteId, newType, newColor, newFolderId, newPrivate, isDar
   return (
     <div className="flex flex-col h-full" style={{ background: colorBg(color, isDark) }}>
       {/* Top bar */}
-      <header className="flex items-center gap-1 px-2 sm:px-3 h-14 border-b border-border/60 bg-background/60 backdrop-blur-md ls-no-print">
+      <header className="flex items-center gap-1 px-2 sm:px-4 h-14 glass-header ls-no-print">
         <Button variant="ghost" size="icon" className="rounded-full ls-ripple" onClick={handleClose} aria-label="Back">
           <ArrowLeft className="h-5 w-5" />
         </Button>
-        <div className="flex items-center gap-1 min-w-0">
-          <span className={cn("h-2.5 w-2.5 rounded-full", saved === "saving" ? "bg-amber-500 animate-pulse" : saved === "saved" ? "bg-emerald-500" : "bg-muted-foreground/40")} />
-          <span className="text-xs text-muted-foreground hidden sm:inline">
+        <div className="flex items-center gap-1.5 min-w-0">
+          <span className={cn("h-2.5 w-2.5 rounded-full transition-all", saved === "saving" ? "bg-amber-500 animate-pulse" : saved === "saved" ? "bg-emerald-500" : "bg-muted-foreground/40")} />
+          <span className="text-xs font-medium text-muted-foreground hidden sm:inline">
             {saved === "saving" ? "Saving…" : saved === "saved" ? "Saved" : "Unsaved"}
           </span>
         </div>
@@ -247,11 +247,11 @@ function EditorInner({ noteId, newType, newColor, newFolderId, newPrivate, isDar
               <Palette className="h-5 w-5" />
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-64">
-            <div className="text-xs font-medium mb-2">Note color</div>
+          <PopoverContent className="w-64 glass-dialog rounded-3xl p-4">
+            <div className="text-xs font-medium mb-2.5">Note color</div>
             <div className="grid grid-cols-6 gap-2">
               {NOTE_COLORS.map((c) => (
-                <button key={c.id} onClick={() => { setColor(c.id); markDirty(); setColorOpen(false); }} className={cn("h-8 w-8 rounded-full border-2", color === c.id ? "border-foreground" : "border-transparent")} style={{ background: c.id === "default" ? (isDark ? "#1f1f23" : "#fff") : c.hex }} aria-label={c.label} />
+                <button key={c.id} onClick={() => { setColor(c.id); markDirty(); setColorOpen(false); }} className={cn("h-8 w-8 rounded-full border-2 transition-transform hover:scale-110", color === c.id ? "border-foreground scale-105" : "border-transparent")} style={{ background: c.id === "default" ? (isDark ? "#1f1f23" : "#fff") : c.hex }} aria-label={c.label} />
               ))}
             </div>
           </PopoverContent>
@@ -266,7 +266,7 @@ function EditorInner({ noteId, newType, newColor, newFolderId, newPrivate, isDar
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="rounded-full" aria-label="More"><MoreVertical className="h-5 w-5" /></Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-52">
+          <DropdownMenuContent align="end" className="w-56 glass-dialog rounded-2xl">
             <DropdownMenuItem onClick={() => setMode(mode === "basic" ? "advanced" : "basic")}>
               <Type className="h-4 w-4 mr-2" /> Switch to {mode === "basic" ? "Advanced" : "Basic"} editor
             </DropdownMenuItem>
