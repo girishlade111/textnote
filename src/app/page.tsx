@@ -10,7 +10,7 @@ import { NoteInfoSheet } from "@/components/note-info-sheet";
 import { useApplySettings, fetchSettings } from "@/hooks/use-settings";
 import { useSettingsStore } from "@/lib/stores";
 import { useStats } from "@/hooks/use-data";
-import { idbSeedInitialData } from "@/lib/idb";
+import { idbClearDemoNotes } from "@/lib/idb";
 
 export default function Home() {
   useApplySettings();
@@ -22,22 +22,17 @@ export default function Home() {
     fetchSettings().then(hydrate).catch(() => {});
   }, [hydrate]);
 
-  // Seed demo notes locally if empty on first run
-  const { data: stats } = useStats();
+  // Purge demo notes if present
   useEffect(() => {
-    if (stats && stats.notes === 0 && stats.trash === 0) {
-      idbSeedInitialData()
-        .then((res) => {
-          if (res.seeded) {
-            qc.invalidateQueries({ queryKey: ["notes"] });
-            qc.invalidateQueries({ queryKey: ["folders"] });
-            qc.invalidateQueries({ queryKey: ["tags"] });
-            qc.invalidateQueries({ queryKey: ["stats"] });
-          }
-        })
-        .catch(() => {});
-    }
-  }, [stats?.notes, stats?.trash, qc]);
+    idbClearDemoNotes()
+      .then(() => {
+        qc.invalidateQueries({ queryKey: ["notes"] });
+        qc.invalidateQueries({ queryKey: ["folders"] });
+        qc.invalidateQueries({ queryKey: ["tags"] });
+        qc.invalidateQueries({ queryKey: ["stats"] });
+      })
+      .catch(() => {});
+  }, [qc]);
 
   return (
     <>
