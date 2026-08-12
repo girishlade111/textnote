@@ -78,16 +78,16 @@ export function CreateMenu() {
 
   return (
     <Sheet open={createMenuOpen} onOpenChange={setCreateMenu}>
-      <SheetContent side="bottom" className="rounded-t-3xl p-0">
-        <SheetHeader className="px-5 pt-4 pb-2">
+      <SheetContent side="bottom" className="rounded-t-3xl p-0 glass-panel border-t-glass-border">
+        <SheetHeader className="px-5 pt-5 pb-2">
           <SheetTitle className="text-left flex items-center justify-between">
-            <span>Create a note</span>
+            <span className="text-lg font-bold">Create a note</span>
           </SheetTitle>
           <p className="text-xs text-muted-foreground text-left font-normal">
-            Choose a note type. You can change folder, tags, color, and privacy after creating.
+            Choose a note type. You can change notebook, tags, color, and privacy after creating.
           </p>
         </SheetHeader>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 p-4 pb-8 max-h-[70vh] overflow-y-auto">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 p-5 pb-8 max-h-[70vh] overflow-y-auto">
           {ITEMS.map((item, i) => {
             const Icon = item.icon;
             return (
@@ -97,12 +97,12 @@ export function CreateMenu() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.02 }}
                 onClick={() => handleCreate(item)}
-                className="flex flex-col items-start gap-2 p-3 rounded-2xl border border-border/60 bg-card ls-ripple hover:elev-1 hover:border-primary/40 transition-all text-left"
+                className="flex flex-col items-start gap-2 p-3.5 rounded-3xl glass-card text-left"
               >
-                <span className="h-10 w-10 rounded-xl flex items-center justify-center" style={{ background: `${item.accent}1a`, color: item.accent }}>
+                <span className="h-10 w-10 rounded-2xl flex items-center justify-center border border-border/40" style={{ background: `${item.accent}1a`, color: item.accent }}>
                   <Icon className="h-5 w-5" />
                 </span>
-                <span className="font-medium text-sm">{item.label}</span>
+                <span className="font-semibold text-sm">{item.label}</span>
                 <span className="text-[11px] text-muted-foreground leading-tight">{item.desc}</span>
               </motion.button>
             );
@@ -110,23 +110,23 @@ export function CreateMenu() {
 
           <button
             onClick={handleImport}
-            className="flex flex-col items-start gap-2 p-3 rounded-2xl border border-dashed border-border bg-transparent ls-ripple hover:bg-accent/40 transition-all text-left"
+            className="flex flex-col items-start gap-2 p-3.5 rounded-3xl border border-dashed border-border/70 bg-card/40 backdrop-blur-md ls-ripple hover:bg-accent/40 transition-all text-left"
           >
-            <span className="h-10 w-10 rounded-xl flex items-center justify-center bg-accent text-accent-foreground">
+            <span className="h-10 w-10 rounded-2xl flex items-center justify-center bg-accent text-accent-foreground">
               <Download className="h-5 w-5" />
             </span>
-            <span className="font-medium text-sm">Import Content</span>
+            <span className="font-semibold text-sm">Import Content</span>
             <span className="text-[11px] text-muted-foreground leading-tight">From Markdown, JSON, HTML, TXT</span>
           </button>
 
           <button
             onClick={handlePrivate}
-            className="flex flex-col items-start gap-2 p-3 rounded-2xl border border-primary/30 bg-primary/5 ls-ripple hover:bg-primary/10 transition-all text-left"
+            className="flex flex-col items-start gap-2 p-3.5 rounded-3xl border border-primary/40 bg-primary/10 backdrop-blur-md ls-ripple hover:bg-primary/20 transition-all text-left"
           >
-            <span className="h-10 w-10 rounded-xl flex items-center justify-center bg-primary text-primary-foreground">
+            <span className="h-10 w-10 rounded-2xl flex items-center justify-center bg-primary text-primary-foreground shadow-sm">
               <ShieldCheck className="h-5 w-5" />
             </span>
-            <span className="font-medium text-sm">Create in PrivateSafe</span>
+            <span className="font-semibold text-sm">Create in PrivateSafe</span>
             <span className="text-[11px] text-muted-foreground leading-tight">Encrypted, biometric-locked</span>
           </button>
         </div>
