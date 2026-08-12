@@ -279,12 +279,12 @@ function mapFontFamily(f: string): string {
 
 function Section({ icon: Icon, title, desc, children }: { icon: any; title: string; desc?: string; children: React.ReactNode }) {
   return (
-    <motion.section initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl border border-border/60 bg-card p-4 sm:p-5">
-      <div className="flex items-center gap-2.5 mb-4">
-        <span className="h-9 w-9 rounded-xl bg-accent text-accent-foreground flex items-center justify-center"><Icon className="h-4.5 w-4.5" /></span>
+    <motion.section initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="rounded-3xl glass-panel p-5 sm:p-6">
+      <div className="flex items-center gap-3 mb-5">
+        <span className="h-10 w-10 rounded-2xl bg-accent/70 text-accent-foreground flex items-center justify-center border border-border/50"><Icon className="h-5 w-5 text-primary" /></span>
         <div>
-          <h2 className="font-semibold leading-tight">{title}</h2>
-          {desc && <p className="text-xs text-muted-foreground">{desc}</p>}
+          <h2 className="font-semibold text-base leading-tight">{title}</h2>
+          {desc && <p className="text-xs text-muted-foreground mt-0.5">{desc}</p>}
         </div>
       </div>
       <div className="space-y-4">{children}</div>
