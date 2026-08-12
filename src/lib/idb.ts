@@ -866,138 +866,53 @@ export async function idbRestoreHistoryNote(noteId: string, historyId: string): 
 // ---------------- INITIAL DEMO SEED ----------------
 
 export async function idbSeedInitialData(force = false): Promise<{ seeded: boolean; count: number }> {
-  const notes = await idbGetNotes({ scope: "all" });
-  const trashNotes = await idbGetNotes({ scope: "trash" });
+  // Demo/dummy note seeding disabled as requested by user
+  return { seeded: false, count: 0 };
+}
 
-  if (!force && (notes.length > 0 || trashNotes.length > 0)) {
-    return { seeded: false, count: 0 };
+export async function idbClearDemoNotes(): Promise<{ cleared: boolean }> {
+  const db = await openDB();
+  const transaction = db.transaction(["notes", "folders", "tags", "history"], "readwrite");
+  const noteStore = transaction.objectStore("notes");
+  const folderStore = transaction.objectStore("folders");
+  const tagStore = transaction.objectStore("tags");
+  const historyStore = transaction.objectStore("history");
+
+  const notes = await reqToPromise<NoteDto[]>(noteStore.getAll());
+  const demoTitles = new Set([
+    "Welcome to LS Notes",
+    "Project Roadmap 2026",
+    "Reading List",
+    "Morning Pages",
+    "Quick Snippet — Debounce",
+  ]);
+
+  for (const n of notes) {
+    if (demoTitles.has(n.title)) {
+      noteStore.delete(n.id);
+      const historyIdx = historyStore.index("noteId");
+      const keys = await reqToPromise<IDBValidKey[]>(historyIdx.getAllKeys(n.id));
+      for (const k of keys) historyStore.delete(k);
+    }
   }
 
-  const samples = [
-    {
-      title: "Welcome to LS Notes",
-      type: "text" as NoteType,
-      color: "teal" as NoteColor,
-      isPinned: true,
-      blocks: [
-        { id: uid(), type: "heading", text: "Welcome to LS Notes", level: 1, align: "left" },
-        {
-          id: uid(),
-          type: "text",
-          text: "LS Notes is a premium, private, local-first note-taking app. Everything you create stays on your local device storage using IndexedDB — no accounts, no cloud, no tracking.",
-          align: "left",
-          marks: [],
-        },
-        { id: uid(), type: "heading", text: "What you can do", level: 2, align: "left" },
-        {
-          id: uid(),
-          type: "bullet",
-          items: [
-            { id: uid(), text: "Capture ideas as text, checklists, photos, audio, sketches, and more", indent: 0 },
-            { id: uid(), text: "Organize with notebooks, tags, colors, and pins", indent: 0 },
-            { id: uid(), text: "Lock sensitive notes in PrivateSafe", indent: 0 },
-            { id: uid(), text: "Import & export to Markdown, JSON, HTML, PDF", indent: 0 },
-          ],
-        },
-        { id: uid(), type: "quote", text: "Privacy by design. Your words never leave your device." },
-      ],
-    },
-    {
-      title: "Project Roadmap 2026",
-      type: "checklist" as NoteType,
-      color: "violet" as NoteColor,
-      blocks: [
-        { id: uid(), type: "heading", text: "Project Roadmap 2026", level: 1, align: "left" },
-        {
-          id: uid(),
-          type: "checklist",
-          items: [
-            { id: uid(), text: "Define Q1 milestones", checked: true, indent: 0 },
-            { id: uid(), text: "Finalize design system", checked: true, indent: 0 },
-            { id: uid(), text: "Ship beta to early testers", checked: false, indent: 0 },
-            { id: uid(), text: "Collect feedback and iterate", checked: false, indent: 0 },
-            { id: uid(), text: "Launch v1.0", checked: false, indent: 0 },
-          ],
-        },
-      ],
-    },
-    {
-      title: "Reading List",
-      type: "bookmark" as NoteType,
-      color: "amber" as NoteColor,
-      blocks: [
-        { id: uid(), type: "heading", text: "Reading List", level: 1, align: "left" },
-        {
-          id: uid(),
-          type: "bookmark",
-          url: "https://material.io/design",
-          title: "Material Design 3",
-          description: "Google's open-source design system for building beautiful, accessible products.",
-        },
-        {
-          id: uid(),
-          type: "bookmark",
-          url: "https://developer.mozilla.org",
-          title: "MDN Web Docs",
-          description: "Resources for developers, by developers.",
-        },
-      ],
-    },
-    {
-      title: "Morning Pages",
-      type: "text" as NoteType,
-      color: "rose" as NoteColor,
-      blocks: [
-        { id: uid(), type: "heading", text: "Morning Pages", level: 1, align: "left" },
-        {
-          id: uid(),
-          type: "text",
-          text: "Today feels like a fresh start. Three pages of stream-of-consciousness writing to clear the mind and set intentions for the day ahead.",
-          align: "left",
-          marks: [{ start: 0, end: 5, bold: true }],
-        },
-      ],
-    },
-    {
-      title: "Quick Snippet — Debounce",
-      type: "code" as NoteType,
-      color: "green" as NoteColor,
-      blocks: [
-        { id: uid(), type: "heading", text: "Debounce helper", level: 2, align: "left" },
-        {
-          id: uid(),
-          type: "code",
-          code: "function debounce<T extends (...args: any[]) => void>(fn: T, ms = 300) {\n  let t: ReturnType<typeof setTimeout>;\n  return (...args: Parameters<T>) => {\n    clearTimeout(t);\n    t = setTimeout(() => fn(...args), ms);\n  };\n}",
-          language: "typescript",
-        },
-      ],
-    },
-  ];
-
-  for (const s of samples) {
-    await idbCreateNote({
-      title: s.title,
-      content: s.blocks as ContentBlock[],
-      type: s.type,
-      color: s.color,
-      isPrivate: false,
-    });
-  }
-
-  // Seed sample folders
-  const folders = [
-    { name: "Work", color: "blue" as NoteColor },
-    { name: "Personal", color: "pink" as NoteColor },
-    { name: "Ideas", color: "amber" as NoteColor },
-  ];
+  // Remove demo folders if empty
+  const folders = await reqToPromise<FolderDto[]>(folderStore.getAll());
+  const demoFolders = new Set(["Work", "Personal", "Ideas"]);
   for (const f of folders) {
-    await idbCreateFolder(f);
+    if (demoFolders.has(f.name)) {
+      folderStore.delete(f.id);
+    }
   }
 
-  // Seed sample tags
-  for (const t of ["important", "todo", "inspiration", "reference"]) {
-    await idbCreateTag({ name: t, color: "default" });
+  // Remove demo tags if empty
+  const tags = await reqToPromise<TagDto[]>(tagStore.getAll());
+  const demoTags = new Set(["important", "todo", "inspiration", "reference"]);
+  for (const t of tags) {
+    if (demoTags.has(t.name)) {
+      tagStore.delete(t.id);
+    }
   }
 
-  return { seeded: true, count: samples.length };
+  return { cleared: true };
 }
