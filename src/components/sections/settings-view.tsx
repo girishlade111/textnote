@@ -29,6 +29,8 @@ import { downloadFile } from "@/lib/ui-helpers";
 import { useCreateNote } from "@/hooks/use-data";
 import { idbGetNotes } from "@/lib/idb";
 import { formatFileSize } from "@/lib/notes";
+import { cn } from "@/lib/utils";
+import { Logo } from "@/components/logo";
 
 const ACCENT_OPTIONS = ["emerald","teal","green","rose","pink","orange","amber","violet","purple","cyan"];
 

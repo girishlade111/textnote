@@ -761,10 +761,14 @@ export async function idbGetStats() {
     archived: activeNotes.filter((n) => n.isArchived).length,
     trash: trashNotes.length,
     notebooks: folders.length,
+    folders: folders.length,
     tags: tags.length,
     private: activeNotes.filter((n) => n.isPrivate).length,
+    privateNotes: activeNotes.filter((n) => n.isPrivate).length,
+    attachments: attachmentsCount,
     attachmentsCount,
     attachmentsBytes,
+    attachmentBytes: attachmentsBytes,
   };
 }
 
