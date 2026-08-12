@@ -38,7 +38,7 @@ interface CreateNoteInput {
   type?: NoteType;
   color?: NoteColor;
   colorMode?: string;
-  folderId?: string;
+  folderId?: string | null;
   isPrivate?: boolean;
   tags?: string[];
 }

@@ -9,12 +9,12 @@ import { useSelectionStore } from "@/lib/stores";
 import { useBulkNotesAction, useFolders, useTags } from "@/hooks/use-data";
 import type { NoteDto, NoteColor } from "@/lib/types";
 import { colorHex } from "@/lib/types";
-import { exportNotesAsJSON, exportNotesAsMarkdown, downloadExport } from "@/lib/export";
+import { exportNotesAsJson } from "@/lib/export";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
-import { haptic } from "@/lib/ui-helpers";
+import { haptic, downloadFile } from "@/lib/ui-helpers";
 import { cn } from "@/lib/utils";
 
 interface BulkActionBarProps {
@@ -96,8 +96,8 @@ export function BulkActionBar({ notes, isTrashView }: BulkActionBarProps) {
     haptic();
     const selectedNotes = notes.filter((n) => selected.has(n.id));
     if (selectedNotes.length === 0) return;
-    const jsonStr = exportNotesAsJSON(selectedNotes);
-    downloadExport(`ls-notes-batch-export-${Date.now()}.json`, jsonStr, "application/json");
+    const jsonStr = exportNotesAsJson(selectedNotes);
+    downloadFile(`ls-notes-batch-export-${Date.now()}.json`, jsonStr, "application/json");
     toast.success(`Exported ${selectedNotes.length} note${selectedNotes.length > 1 ? "s" : ""}`);
   };
 

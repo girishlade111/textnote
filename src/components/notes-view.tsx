@@ -6,6 +6,12 @@ import { Plus, StickyNote, SearchX } from "lucide-react";
 import { NoteCard } from "@/components/note-card";
 import { BulkActionBar } from "@/components/bulk-action-bar";
 import { useApp } from "@/lib/app-store";
+import { useUIStore, usePrivateSafeStore } from "@/lib/stores";
+import { useUpdateNote, useDeleteNote, useDuplicateNote } from "@/hooks/use-data";
+import { useTheme } from "next-themes";
+import type { NoteDto, NoteColor } from "@/lib/types";
+import { toast } from "sonner";
+import { haptic } from "@/lib/ui-helpers";
 
 interface NotesViewProps {
   notes: NoteDto[];

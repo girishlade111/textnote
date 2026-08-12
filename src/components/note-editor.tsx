@@ -34,8 +34,6 @@ export function NoteEditor() {
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === "dark";
 
-  const activeNoteId = noteId || (loadedId && loadedId !== "new" ? loadedId : null);
-
   if (!editorOpen) return null;
 
   return (
@@ -92,6 +90,8 @@ function EditorInner({ noteId, newType, newColor, newFolderId, newPrivate, isDar
 
   const saveTimer = useRef<any>(null);
   const createdRef = useRef<string | null>(null);
+
+  const activeNoteId = noteId || (loadedId && loadedId !== "new" ? loadedId : null);
 
   // Initialize from existing or new
   useEffect(() => {
