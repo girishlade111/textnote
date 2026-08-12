@@ -27,6 +27,7 @@ import { toast } from "sonner";
 import { haptic } from "@/lib/ui-helpers";
 import { cn } from "@/lib/utils";
 import { DrawingCanvas } from "@/components/drawing-canvas";
+import { NoteHistoryDialog } from "@/components/note-history-dialog";
 
 export function NoteEditor() {
   const { editorOpen, editorNoteId, editorNewType, editorNewColor, editorNewFolderId, editorNewPrivate, closeEditor, setInfoNote, openMove } = useApp();
