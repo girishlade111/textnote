@@ -263,7 +263,7 @@ export function BulkActionBar({ notes, isTrashView }: BulkActionBarProps) {
 
       {/* Batch Tag Dialog */}
       <Dialog open={tagOpen} onOpenChange={setTagOpen}>
-        <DialogContent className="max-w-xs rounded-2xl">
+        <DialogContent className="max-w-xs rounded-3xl glass-dialog">
           <DialogHeader>
             <DialogTitle>Tag {selectedCount} notes</DialogTitle>
           </DialogHeader>
